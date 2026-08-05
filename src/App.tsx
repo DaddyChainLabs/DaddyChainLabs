@@ -4,10 +4,16 @@ import StatusBar from "./components/StatusBar";
 import Header from "./components/Header";
 import CharacterGallery from "./components/CharacterGallery";
 import Footer from "./components/Footer";
+import IntroScreen from "./components/IntroScreen";
 
 export default function App() {
+  const [entered, setEntered] = useState(false);
   const [statusVisible, setStatusVisible] = useState(false);
   const [galleryVisible, setGalleryVisible] = useState(false);
+
+  if (!entered) {
+    return <IntroScreen onEnter={() => setEntered(true)} />;
+  }
 
   return (
     <div

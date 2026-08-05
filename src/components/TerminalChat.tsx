@@ -184,7 +184,7 @@ export default function TerminalChat({
 
   // Scroll to bottom whenever messages change
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [messages]);
 
   // Run the script once on mount
@@ -211,35 +211,34 @@ export default function TerminalChat({
           onStatusReady();
         }
 
-        // Add message slot (empty)
-        setMessages((prev) => [
-          ...prev,
-          { stepIdx: i, displayText: "", done: false },
-        ]);
+        const isLastStep = i === SCRIPT.length - 1;
 
-        // Type out characters
-        const speed = step.charSpeed ?? 38;
-        for (let c = 1; c <= step.text.length; c++) {
-          if (cancelled) break;
-          await sleep(speed);
-          const partial = step.text.slice(0, c);
-          setMessages((prev) =>
-            prev.map((m) =>
-              m.stepIdx === i ? { ...m, displayText: partial } : m
-            )
-          );
-        }
-
-        if (cancelled) break;
-
-        // Mark done (unless keepCursor — cursor stays but message is done typing)
-        if (!step.keepCursor) {
-          setMessages((prev) =>
-            prev.map((m) => (m.stepIdx === i ? { ...m, done: true } : m))
-          );
+        if (!isLastStep) {
+          setMessages((prev: { stepIdx: number; displayText: string; done: boolean }[]) => [
+            ...prev,
+            { stepIdx: i, displayText: step.text, done: true },
+          ]);
         } else {
-          // For the last line we mark done so progress bar etc. shows, but keep cursor via prop
-          setMessages((prev) =>
+          setMessages((prev: { stepIdx: number; displayText: string; done: boolean }[]) => [
+            ...prev,
+            { stepIdx: i, displayText: "", done: false },
+          ]);
+
+          const speed = step.charSpeed ?? 38;
+          for (let c = 1; c <= step.text.length; c++) {
+            if (cancelled) break;
+            await sleep(speed);
+            const partial = step.text.slice(0, c);
+            setMessages((prev: { stepIdx: number; displayText: string; done: boolean }[]) =>
+              prev.map((m: { stepIdx: number; displayText: string; done: boolean }) =>
+                m.stepIdx === i ? { ...m, displayText: partial } : m
+              )
+            );
+          }
+
+          if (cancelled) break;
+
+          setMessages((prev: { stepIdx: number; displayText: string; done: boolean }[]) =>
             prev.map((m) => (m.stepIdx === i ? { ...m, done: true } : m))
           );
         }
