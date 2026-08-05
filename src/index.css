@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+/* ── Fonts ─────────────────────────────────────────────── */
+* {
+  font-family: "JetBrains Mono", "Fira Code", "Courier New", monospace;
+}
+
+/* ── Global reset ───────────────────────────────────────── */
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  background: #000;
+  color: #fff;
+  min-height: 100vh;
+}
+
+/* ── Blinking cursor ─────────────────────────────────────── */
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+.animate-blink {
+  animation: blink 1s step-end infinite;
+}
+
+/* ── Green text glow ─────────────────────────────────────── */
+.text-green-300 {
+  text-shadow: 0 0 8px rgba(134, 239, 172, 0.25);
+}
+
+.text-green-400 {
+  text-shadow: 0 0 10px rgba(74, 222, 128, 0.35);
+}
+
+.text-green-500 {
+  text-shadow: 0 0 12px rgba(34, 197, 94, 0.4);
+}
+
+/* ── White owner text subtle glow ─────────────────────────── */
+.text-white {
+  text-shadow: 0 0 6px rgba(255,255,255,0.08);
+}
+
+/* ── Progress bar transition ──────────────────────────────── */
+.duration-1500 {
+  transition-duration: 1500ms;
+}
+
+/* ── Scanline overlay on entire page (subtle) ─────────────── */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0, 0, 0, 0.04) 3px,
+    rgba(0, 0, 0, 0.04) 4px
+  );
+  z-index: 9999;
+}
+
+/* ── Scrollbar styling ────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #000;
+}
+::-webkit-scrollbar-thumb {
+  background: #14532d;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #166534;
+}
