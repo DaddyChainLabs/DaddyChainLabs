@@ -275,7 +275,7 @@ export default function TerminalChat({
         </div>
 
         {/* Chat area */}
-        <div className="p-4 sm:p-6 flex flex-col gap-5 min-h-[60vh]">
+        <div className="p-4 sm:p-6 flex flex-col gap-5 h-[60vh] overflow-y-auto scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {messages.map((msg) => {
             const step = SCRIPT[msg.stepIdx];
             return (
