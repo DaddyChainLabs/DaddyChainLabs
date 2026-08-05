@@ -198,56 +198,56 @@ export default function TerminalChat({
       new Promise<void>((res) => setTimeout(res, ms));
 
     async function runScript() {
-      for (let i = 0; i < SCRIPT.length; i++) {
+      // Show every message except the last one immediately, all at once.
+      const earlyCount = SCRIPT.length - 1;
+      setMessages(
+        SCRIPT.slice(0, earlyCount).map((step, i) => ({
+          stepIdx: i,
+          displayText: step.text,
+          done: true,
+        }))
+      );
+      SCRIPT.slice(0, earlyCount).forEach((step) => {
+        if (step.triggerStatus) onStatusReady();
+      });
+
+      // Only the last message plays out with delay + typing.
+      const i = earlyCount;
+      const step = SCRIPT[i];
+
+      await sleep(step.preDelay ?? 600);
+      if (cancelled) return;
+
+      if (step.triggerStatus) {
+        onStatusReady();
+      }
+
+      setMessages((prev: { stepIdx: number; displayText: string; done: boolean }[]) => [
+        ...prev,
+        { stepIdx: i, displayText: "", done: false },
+      ]);
+
+      const speed = step.charSpeed ?? 38;
+      for (let c = 1; c <= step.text.length; c++) {
         if (cancelled) break;
-        const step = SCRIPT[i];
+        await sleep(speed);
+        const partial = step.text.slice(0, c);
+        setMessages((prev: { stepIdx: number; displayText: string; done: boolean }[]) =>
+          prev.map((m: { stepIdx: number; displayText: string; done: boolean }) =>
+            m.stepIdx === i ? { ...m, displayText: partial } : m
+          )
+        );
+      }
 
-        // Wait before this message appears
-        await sleep(step.preDelay ?? 600);
-        if (cancelled) break;
+      if (cancelled) return;
 
-        // Trigger status bar before typing begins
-        if (step.triggerStatus) {
-          onStatusReady();
-        }
+      setMessages((prev: { stepIdx: number; displayText: string; done: boolean }[]) =>
+        prev.map((m) => (m.stepIdx === i ? { ...m, done: true } : m))
+      );
 
-        const isLastStep = i === SCRIPT.length - 1;
-
-        if (!isLastStep) {
-          setMessages((prev: { stepIdx: number; displayText: string; done: boolean }[]) => [
-            ...prev,
-            { stepIdx: i, displayText: step.text, done: true },
-          ]);
-        } else {
-          setMessages((prev: { stepIdx: number; displayText: string; done: boolean }[]) => [
-            ...prev,
-            { stepIdx: i, displayText: "", done: false },
-          ]);
-
-          const speed = step.charSpeed ?? 38;
-          for (let c = 1; c <= step.text.length; c++) {
-            if (cancelled) break;
-            await sleep(speed);
-            const partial = step.text.slice(0, c);
-            setMessages((prev: { stepIdx: number; displayText: string; done: boolean }[]) =>
-              prev.map((m: { stepIdx: number; displayText: string; done: boolean }) =>
-                m.stepIdx === i ? { ...m, displayText: partial } : m
-              )
-            );
-          }
-
-          if (cancelled) break;
-
-          setMessages((prev: { stepIdx: number; displayText: string; done: boolean }[]) =>
-            prev.map((m) => (m.stepIdx === i ? { ...m, done: true } : m))
-          );
-        }
-
-        // Trigger gallery after script finishes
-        if (step.triggerComplete) {
-          await sleep(800);
-          onScriptComplete();
-        }
+      if (step.triggerComplete) {
+        await sleep(800);
+        onScriptComplete();
       }
     }
 
